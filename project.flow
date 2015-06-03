@@ -8,12 +8,12 @@
     app : {
       name : 'EmptyProject',
       package : 'com.djpale.emptyproject',
+      codepaths : ['src', 'lib/hscript']
     },
 
     build : {
       dependencies : {
         luxe : '*',
-        hscript: '*'
       }
     },
 

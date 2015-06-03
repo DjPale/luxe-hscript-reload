@@ -5,6 +5,7 @@ import luxe.Vector;
 
 import hscript.Parser;
 import hscript.Expr;
+import hscript.Interp;
 
 import Main;
 
@@ -14,7 +15,7 @@ class TestView extends State
 	var global : GlobalData;
 
     var scr_parser : Parser;
-    var scr_interp : MyInterp;
+    var scr_interp : Interp;
     var scr_program : Expr;
 
     var scr_init : Void->Void;
@@ -32,7 +33,7 @@ class TestView extends State
 
         scr_program = scr_parser.parseString(global.script);
 
-        scr_interp = new MyInterp();
+        scr_interp = new Interp();
         scr_interp.variables.set('ScriptInterface', ScriptInterface);
         scr_interp.variables.set('luxe.Vector', luxe.Vector);
 

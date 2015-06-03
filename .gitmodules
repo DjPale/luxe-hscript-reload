@@ -1,0 +1,3 @@
+[submodule "lib/hscript"]
+	path = lib/hscript
+	url = https://github.com/DjPale/hscript
