@@ -1,0 +1,26 @@
+{
+
+  project : {
+    name : 'Empty Project',
+    version : '0.0.1',
+    author : 'dj_pale',
+
+    app : {
+      name : 'EmptyProject',
+      package : 'com.djpale.emptyproject',
+    },
+
+    build : {
+      dependencies : {
+        luxe : '*',
+        hscript: '*'
+      }
+    },
+
+    files : {
+      assets : 'assets/'
+    }
+
+  }
+
+}
