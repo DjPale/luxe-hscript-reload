@@ -1,20 +1,22 @@
 {
 
   project : {
-    name : 'Empty Project',
+    name : 'luxe hscript live reload demo',
     version : '0.0.1',
     author : 'dj_pale',
 
     app : {
-      name : 'EmptyProject',
+      name : 'luxe-hscript-reload',
       package : 'com.djpale.emptyproject',
-      codepaths : ['src', 'lib/hscript']
+      codepaths : ['src', 'lib/hscript', 'assets']
     },
 
     build : {
       dependencies : {
         luxe : '*',
-      }
+        delta : '*'
+      },
+      defines : ['hscriptPos']
     },
 
     files : {

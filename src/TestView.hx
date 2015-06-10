@@ -2,6 +2,9 @@ import luxe.States;
 import luxe.Text;
 import luxe.Input;
 import luxe.Vector;
+import luxe.Sprite;
+
+import tween.Delta;
 
 import hscript.Parser;
 import hscript.Expr;
@@ -20,6 +23,9 @@ class TestView extends State
 
     var scr_init : Void->Void;
     var scr_main : Void->Void;
+    var scr_destroy : Void->Void;
+
+    var enemy_spr : Sprite;
 
 	public function new(_global:GlobalData, _batcher:phoenix.Batcher)
 	{
@@ -28,28 +34,12 @@ class TestView extends State
 		batcher = _batcher;
 		global = _global;
 
-        scr_parser = new Parser();
-        scr_parser.allowTypes = true;      
+        enemy_spr = new Sprite({name:'enemy'});
 
-        scr_program = scr_parser.parseString(global.script);
+        scr_parser = new Parser();
+        scr_parser.allowTypes = true; 
 
         scr_interp = new Interp();
-        scr_interp.variables.set('ScriptInterface', ScriptInterface);
-        scr_interp.variables.set('luxe.Vector', luxe.Vector);
-
-        scr_interp.execute(scr_program);
-
-        scr_init = cast scr_interp.variables.get('init');
-        scr_main = cast scr_interp.variables.get('main');
-
-        scr_init();
-
-        ScriptInterface.label = new Text({
-            name: 'label',
-            pos: Luxe.screen.mid,
-            point_size: 30,
-            text: 'label'
-            });
 	}
 
 	override function onenabled<T>(ignored:T)
@@ -66,21 +56,100 @@ class TestView extends State
     {
         trace('enter TestView');
 
+        setup_script();
         run_script();
+
+        Luxe.events.listen('reload', reload_script);
     } //onenter
 
     override function onleave<T>(ignored:T)
     {
     	trace('leave TestView');
+
+        Luxe.events.unlisten('reload');
     }
 
     override function onkeyup(e:luxe.KeyEvent)
     {
+        scr_destroy();
+        scr_init();
+        scr_main();
+    }
+
+    function reload_script(_)
+    {
+        scr_destroy();
+
+        setup_script();
         run_script();
     }
 
+    function load_script()
+    {
+        trace('load_script');
+
+        scr_interp.variables.set('Luxe', Luxe);
+        scr_interp.variables.set('Delta', Delta);
+        scr_interp.variables.set('Vector', luxe.Vector);
+        scr_interp.variables.set('Sprite', luxe.Sprite);
+        scr_interp.variables.set('entity', enemy_spr);
+        
+        try
+        {
+            scr_interp.execute(scr_program);
+        }
+        catch(e:Dynamic)
+        {
+            trace('Script runtime error: $e');
+            return;
+        }
+
+        scr_init = cast scr_interp.variables.get('init');
+        scr_main = cast scr_interp.variables.get('main');
+        scr_destroy = cast scr_interp.variables.get('destroy');
+
+        if (scr_init != null)
+        {
+            scr_init();
+        }
+    }
+
+    function setup_script()
+    {
+        trace('setup_script');
+
+        try
+        {
+            scr_program = scr_parser.parseString(global.script);
+            load_script();
+        }
+        catch(e:Dynamic)
+        {
+            trace('Script parse error: $e');
+        }
+    }
+
+
     function run_script()
     {
-       scr_main();
+        trace('run_script');
+
+        if (scr_main != null)
+        {
+            try
+            {
+                scr_main();
+            }
+            catch(e:Dynamic)
+            {
+                trace('Script runtime error: ${e.e}');
+                return;
+            }
+        }
+    }
+
+    override function update(dt:Float)
+    {
+        Delta.step(dt);
     }
 }
