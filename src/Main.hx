@@ -4,12 +4,11 @@ import luxe.Parcel;
 
 typedef GlobalData = {
     views: States,
-    script: String,
 }
 
 class Main extends luxe.Game 
 {
-    var global : GlobalData = { views: null, script: null };
+    var global : GlobalData = { views: null };
 
     var asset_path : String = 'assets/';
 
@@ -41,8 +40,6 @@ class Main extends luxe.Game
 
     function notify_reload(d:luxe.resource.Resource.TextResource)
     {
-        global.script = d.asset.text;
-
         Luxe.events.fire('reload', d);
         trace('fire reload with $d');
     }
@@ -55,9 +52,6 @@ class Main extends luxe.Game
         // new CustomProgress(preload, load_complete);
 
         // preload.load();
-
-        global.script = Luxe.resources.text('assets/Test1.hx').asset.text; 
-
         load_complete(true);
     } //ready
 
