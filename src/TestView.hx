@@ -1,11 +1,12 @@
 import luxe.States;
 import luxe.Text;
 import luxe.Input;
-import luxe.Vector;
 import luxe.Sprite;
 
 import tween.Delta;
-import tween.easing.*;
+
+import scripting.ScriptClassLibrary;
+import scripting.ScriptManager;
 
 import Main;
 
@@ -26,23 +27,13 @@ class TestView extends State
 		global = _global;
 
         enemy_spr = new Sprite({name:'enemy'});
+        enemy_spr.add(new BossWeapons({name: 'BossWeapons'}));
 
-        tween.easing.Back.easeIn(0, 0, 0);
-        tween.easing.Bounce.easeIn(0, 0, 0);
-        tween.easing.Cubic.easeIn(0, 0, 0);
-        tween.easing.Elastic.easeIn(0, 0, 0);
-        tween.easing.Expo.easeIn(0, 0, 0);
-        tween.easing.Quad.easeIn(0, 0, 0);
-        tween.easing.Quart.easeIn(0, 0, 0);
-        //tween.easing.Quint.easeIn(0, 0, 0);
-        tween.easing.Sine.easeIn(0, 0, 0);
 
-        trace(new Vector());
         script = new ScriptManager();
 
         script.register_variable('Luxe', Luxe);
         script.register_variable('entity', enemy_spr);
-        script.register_variable('Vector', luxe.Vector);
     }
 
 	override function onenabled<T>(ignored:T)
@@ -55,13 +46,50 @@ class TestView extends State
     	trace('disable TestView');
     } //ondisabled
 
+    
     override function onenter<T>(ignored:T) 
     {
         trace('enter TestView');
 
         load_script(Luxe.resources.text('assets/Test1.hx'));
         Luxe.events.listen('reload', reload_script);
+
+        /*
+        seq = new ScriptSequencer();
+        seq.loop = false;
+        //seq.abort_function = stop_actions;
+        seq.add({ name: 'intro', func: test_func, num: 1 });
+        seq.add({ name: 'next', func: test_func2, num: 3 });
+        seq.start();
+        */
     } //onenter
+
+    /*
+    var seq : ScriptSequencer;
+    var ii = 0;
+
+    function test_func()
+    {
+        trace('test_func - $ii');
+
+        ii++;
+
+        Delta.tween(this)
+            .wait(1.0)
+            .onComplete(seq.complete);
+    }
+
+    function test_func2()
+    {
+        trace('test_func2 - $ii');
+
+        ii++;
+
+        Delta.tween(this)
+            .wait(1.0)
+            .onComplete(seq.complete);
+    }
+    */
 
     override function onleave<T>(ignored:T)
     {

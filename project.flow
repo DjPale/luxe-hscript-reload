@@ -16,7 +16,8 @@
         luxe : '*',
         delta : '*'
       },
-      defines : ['hscriptPos']
+      defines : ['hscriptPos'],
+      flags: ['-dce no']
     },
 
     files : {
