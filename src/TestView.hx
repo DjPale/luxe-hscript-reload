@@ -6,6 +6,7 @@ import luxe.Sprite;
 import tween.Delta;
 
 import scripting.ScriptClassLibrary;
+import scripting.ScriptClassLibraryLuxe;
 import scripting.ScriptManager;
 
 import Main;

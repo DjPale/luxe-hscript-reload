@@ -24,22 +24,21 @@ class BossWeapons extends Component
 		bullets = new Pool<Sprite>(30, create_bullet);
 
 		beam = new Sprite({
-			name: 'beam',
+			name: 'boss.beam',
 			visible: false,
-			color: new Color().rgb(0xf8822ff),
 			parent: entity,
-			centered: false
 			});
 	}
 
 	function create_bullet(i:Int, len:Int) : Sprite
 	{
-		return new Sprite({
-			name: 'bullet-$i',
+		var ret = new Sprite({
+			name: 'boss.bullet-$i',
 			visible: false,
 			size: new Vector(4, 4),
-			color: new Color().rgb(0xff2288)
 			});
+
+		return ret;
 	}
 
 	public function start_bullets(rate:Float, speed:Float)
@@ -63,12 +62,20 @@ class BossWeapons extends Component
 	{
 		beam.size = new Vector(width, height);
 		beam.pos = new Vector(0, 64);
+
 		beam.visible = true;
+		entity.events.fire('BossWeapons.beam.fire', beam);
 	}
 
-	public function stop_beam()
+	public function stop_beam(?set_invisible:Bool = true)
 	{
-		beam.visible = false;
+		entity.events.fire('BossWeapons.beam.disappear', beam);
+
+		if (set_invisible)
+		{
+			beam.visible = false;
+			trace('set beam visible');
+		}
 	}
 
 	inline function bullet_tick(dt:Float)
@@ -81,8 +88,10 @@ class BossWeapons extends Component
 			{
 				var b = bullets.get();
 				b.pos = entity.pos.clone();
-				b.visible = true;
 				bullet_cur_cnt = bullet_rof;
+				b.visible = true;
+
+				entity.events.fire('BossWeapons.bullet.fire', b);
 			}
 		}
 
@@ -96,6 +105,7 @@ class BossWeapons extends Component
 
 				if (b.pos.y > Luxe.screen.height)
 				{
+					entity.events.fire('BossWeapons.bullet.disappear', b);
 					b.visible = false;
 				}
 			}
