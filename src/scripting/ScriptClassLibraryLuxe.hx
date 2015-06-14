@@ -22,7 +22,7 @@ import tween.easing.Expo;
 import tween.easing.Linear;
 import tween.easing.Quad;
 import tween.easing.Quart;
-//import tween.easing.Quint; // seems to be a bug in the delta library, issue reported
+import tween.easing.Quint;
 import tween.easing.Sine;
 
 // I still like Actuate for its looping abilities which I haven't found in Delta
