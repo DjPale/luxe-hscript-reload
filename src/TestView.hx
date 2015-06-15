@@ -27,7 +27,10 @@ class TestView extends State
 		batcher = _batcher;
 		global = _global;
 
-        enemy_spr = new Sprite({name:'enemy'});
+        enemy_spr = new Sprite({
+            name:'enemy',
+            texture: Luxe.resources.texture('assets/sprites/boss.png')
+            });
         enemy_spr.add(new BossWeapons({name: 'BossWeapons'}));
 
 

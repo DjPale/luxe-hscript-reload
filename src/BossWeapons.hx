@@ -35,7 +35,7 @@ class BossWeapons extends Component
 		var ret = new Sprite({
 			name: 'boss.bullet-$i',
 			visible: false,
-			size: new Vector(4, 4),
+			texture: Luxe.resources.texture('assets/sprites/boss-bullet.png')
 			});
 
 		return ret;
@@ -74,7 +74,6 @@ class BossWeapons extends Component
 		if (set_invisible)
 		{
 			beam.visible = false;
-			trace('set beam visible');
 		}
 	}
 

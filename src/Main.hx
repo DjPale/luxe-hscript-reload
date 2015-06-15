@@ -2,6 +2,8 @@ import luxe.Input;
 import luxe.States;
 import luxe.Parcel;
 
+using StringTools;
+
 typedef GlobalData = {
     views: States,
 }
@@ -17,6 +19,8 @@ class Main extends luxe.Game
         config.window.title = 'luxe hscript live reload demo!';
 
         config.preload.texts.push({id: 'assets/Test1.hx'});
+        config.preload.textures.push({id: 'assets/sprites/boss.png'});
+        config.preload.textures.push({id: 'assets/sprites/boss-bullet.png'});
 
         return config;
     }
@@ -46,12 +50,6 @@ class Main extends luxe.Game
 
     override function ready()
     {
-        // var preload = new Parcel();
-        // preload.from_json(Luxe.resources.json('assets/parcel.json').asset.json);
-
-        // new CustomProgress(preload, load_complete);
-
-        // preload.load();
         load_complete(true);
     } //ready
 
@@ -72,12 +70,13 @@ class Main extends luxe.Game
             if (pos >= 0)
             {
                 var asset_key = e.file.path.substr(pos);
+                asset_key.replace('\\', '/');
 
                 trace('Trying to find asset with key "$asset_key" from ' + e.file.path);
 
                 var resource = Luxe.resources.get(asset_key);
 
-                if (resource != null) 
+                if (resource != null && asset_key.endsWith('.hx')) 
                 {
                     resource.reload().then(notify_reload);
                 }
