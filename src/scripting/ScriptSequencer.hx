@@ -6,7 +6,6 @@ typedef SequenceAction = {
 	num: Int
 };
 
-
 class ScriptSequencer
 {
 	var actions : Array<SequenceAction>;

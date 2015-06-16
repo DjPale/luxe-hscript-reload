@@ -15,10 +15,12 @@ import scripting.ScriptSequencer;
 
 import BossWeapons;
 
-class Test1
+class Boss
 {
+	// help out our completion by self-assignment
 	var entity : Sprite = entity;
 	//var player : Entity = player;
+
 	var seq : ScriptSequencer;
 	var weapons : BossWeapons;
 	var moveMin : Int = 150;
@@ -72,7 +74,7 @@ class Test1
 		entity.events.listen('EntityHealth.change');
 
 		entity.pos = Luxe.screen.mid;
-		entity.pos.y = -64;
+		entity.pos.y = -100;
 
 		seq = new ScriptSequencer();
 		seq.loop = 1;
@@ -92,8 +94,6 @@ class Test1
 	{
 		bullet.scale.x = 1;
 		bullet.scale.y = 1;
-		bullet.color = new Color();
-		//bullet.color.rgb(0xAF5D45);
 		Actuate.tween(bullet.scale, 0.5, { x: 2, y: 2 }).reflect().repeat();
 	}
 
@@ -167,7 +167,6 @@ class Test1
 			.onComplete(complete_action);
 	}
 
-
 	function intro()
 	{
 		Delta.tween(entity.pos)
@@ -176,5 +175,4 @@ class Test1
 			.wait(2.0)
 			.onComplete(complete_action);
 	}
-
 }

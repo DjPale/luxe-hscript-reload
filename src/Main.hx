@@ -17,8 +17,10 @@ class Main extends luxe.Game
     override function config(config:luxe.AppConfig) : luxe.AppConfig
     {
         config.window.title = 'luxe hscript live reload demo!';
+        config.window.resizable = false;
 
-        config.preload.texts.push({id: 'assets/Test1.hx'});
+        config.preload.texts.push({id: 'assets/Boss.hx'});
+        config.preload.textures.push({id: 'assets/sprites/player.png'});
         config.preload.textures.push({id: 'assets/sprites/boss.png'});
         config.preload.textures.push({id: 'assets/sprites/boss-bullet.png'});
 
@@ -70,9 +72,9 @@ class Main extends luxe.Game
             if (pos >= 0)
             {
                 var asset_key = e.file.path.substr(pos);
-                asset_key.replace('\\', '/');
+                asset_key = asset_key.replace('\\', '/');
 
-                trace('Trying to find asset with key "$asset_key" from ' + e.file.path);
+                //trace('Trying to find asset with key "$asset_key" from ' + e.file.path);
 
                 var resource = Luxe.resources.get(asset_key);
 
@@ -82,7 +84,7 @@ class Main extends luxe.Game
                 }
                 else
                 {
-                    trace('Could not find asset with key "$asset_key"');
+                    trace('Ignoring asset with key "$asset_key"');
                 }
             }
             else

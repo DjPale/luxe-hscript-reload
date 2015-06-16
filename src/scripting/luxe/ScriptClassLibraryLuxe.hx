@@ -1,4 +1,4 @@
-package scripting;
+package scripting.luxe;
 
 import luxe.Entity;
 import luxe.Sprite;
@@ -12,18 +12,6 @@ import phoenix.RenderTexture;
 import phoenix.Batcher;
 import phoenix.Camera;
 import phoenix.Vector;
-
-import tween.Delta;
-import tween.easing.Back;
-import tween.easing.Bounce;
-import tween.easing.Cubic;
-import tween.easing.Elastic;
-import tween.easing.Expo;
-import tween.easing.Linear;
-import tween.easing.Quad;
-import tween.easing.Quart;
-import tween.easing.Quint;
-import tween.easing.Sine;
 
 // I still like Actuate for its looping abilities which I haven't found in Delta
 import luxe.tween.Actuate;

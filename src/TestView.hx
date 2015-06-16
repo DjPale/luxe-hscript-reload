@@ -6,8 +6,9 @@ import luxe.Sprite;
 import tween.Delta;
 
 import scripting.ScriptClassLibrary;
-import scripting.ScriptClassLibraryLuxe;
 import scripting.ScriptManager;
+import scripting.luxe.ScriptClassLibraryLuxe;
+import scripting.luxe.ScriptComponent;
 
 import Main;
 
@@ -16,9 +17,9 @@ class TestView extends State
 	var batcher : phoenix.Batcher;
 	var global : GlobalData;
 
-    var enemy_spr : Sprite;
-
-    var script : ScriptManager;
+    var enemy : Sprite;
+    var player : Sprite;
+    var boss_script : ScriptComponent;
 
 	public function new(_global:GlobalData, _batcher:phoenix.Batcher)
 	{
@@ -26,18 +27,6 @@ class TestView extends State
 
 		batcher = _batcher;
 		global = _global;
-
-        enemy_spr = new Sprite({
-            name:'enemy',
-            texture: Luxe.resources.texture('assets/sprites/boss.png')
-            });
-        enemy_spr.add(new BossWeapons({name: 'BossWeapons'}));
-
-
-        script = new ScriptManager();
-
-        script.register_variable('Luxe', Luxe);
-        script.register_variable('entity', enemy_spr);
     }
 
 	override function onenabled<T>(ignored:T)
@@ -50,14 +39,34 @@ class TestView extends State
     	trace('disable TestView');
     } //ondisabled
 
+    function setup()
+    {
+        player = new Sprite({
+            name: 'Player',
+            pos: new luxe.Vector(Luxe.screen.mid.x, 500),
+            texture: Luxe.resources.texture('assets/sprites/player.png'),
+            scale: new luxe.Vector(1.5, 1.5)
+            });
+
+        enemy = new Sprite({
+            name: 'Boss',
+            texture: Luxe.resources.texture('assets/sprites/boss.png')
+            });
+        enemy.add(new BossWeapons({name: 'BossWeapons'}));
+
+        var script = Luxe.resources.text('assets/Boss.hx').asset.text;
+        boss_script = enemy.add(new ScriptComponent(script, { name: 'ScriptComponent' }));
+
+        boss_script.manager.register_variable('player', player);
+
+        Luxe.events.listen('reload', reload_script);
+    }
     
     override function onenter<T>(ignored:T) 
     {
         trace('enter TestView');
 
-        load_script(Luxe.resources.text('assets/Test1.hx'));
-        Luxe.events.listen('reload', reload_script);
-
+        setup();
         /*
         seq = new ScriptSequencer();
         seq.loop = false;
@@ -102,17 +111,12 @@ class TestView extends State
         Luxe.events.unlisten('reload');
     }
 
-    function load_script(resource:luxe.resource.Resource.TextResource)
-    {
-        script.load_script(resource.asset.text);
-        script.run_function('init');
-        script.run_function('main');
-    }
-
     function reload_script(resource:luxe.resource.Resource.TextResource)
     {
-        script.run_function('destroy');
-        load_script(resource);
+        if (boss_script != null)
+        {
+            boss_script.reload(resource.asset.text);
+        }
     }
 
     override function onkeyup(e:luxe.KeyEvent)
