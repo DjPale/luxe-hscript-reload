@@ -7,6 +7,7 @@ import luxe.Log;
 import luxe.Component;
 import luxe.Color;
 import luxe.Input;
+import luxe.Text;
 
 // note that we have to use the actual class and not the luxe typedef here
 import phoenix.Texture;

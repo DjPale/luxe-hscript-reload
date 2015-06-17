@@ -6,6 +6,7 @@ import tween.Delta;
 import tween.easing.Quad;
 import tween.easing.Sine;
 import tween.easing.Back;
+import tween.easing.Elastic;
 
 import phoenix.Vector;
 
@@ -39,13 +40,18 @@ class Boss
 	function stop_actions()
 	{
 		Delta.removeTweensOf(entity.pos);
+		Delta.removeTweensOf(entity.scale);
+		Delta.removeTweensOf(entity.color);
+
+		Actuate.stop(entity.color);
+
+		weapons.stop_beam();
+		weapons.stop_bullets();
 	}
 
 	function ondestroy()
 	{
 		stop_actions();
-		weapons.stop_beam();
-		weapons.stop_bullets();
 
 		// clear and unsubscribe for all events
 		while (event_ids.length > 0)
@@ -64,6 +70,8 @@ class Boss
 		weapons = entity.get('BossWeapons');
 		health = entity.get('EntityHull');
 
+		health.heal(-1);
+
 		// make sure to set properties to an initial stete in case we are reloading
 		entity.scale = new Vector(2, 2);
 		entity.color = new Color();
@@ -75,6 +83,7 @@ class Boss
 		event_ids.push(entity.events.listen('BossWeapons.beam.disappear', beam_disappear));
 
 		event_ids.push(entity.events.listen('EntityHull.damage', damage));
+		event_ids.push(entity.events.listen('EntityHull.death', death));
 
 		entity.pos = Luxe.screen.mid;
 		entity.pos.y = -100;
@@ -83,7 +92,9 @@ class Boss
 		seq.loop = 1;
 		seq.abort_function = stop_actions;
 		seq.add({ name: 'intro', func: intro, num: 1 });
-		//seq.add({ name: 'swipe', func: swipe, num: 2 });
+		// easy to test specific sequences by modifying this structure!
+		//seq.add({ name: 'death', func: death, num: 1 });
+		seq.add({ name: 'swipe', func: swipe, num: 2 });
 		seq.add({ name: 'prepare_beam', func: prepare_beam, num: 1 });
 		seq.add({ name: 'approach', func: approach, num: 1 });
 
@@ -124,7 +135,30 @@ class Boss
 
 	function damage(amount:Int)
 	{
-		entity.color.tween(0.5, { g: 0.5, b: 0.5 } ).reflect().repeat(1); 
+		entity.color.g = 1;
+		entity.color.b = 1;
+		entity.color.tween(0.2, { g: 0.25, b: 0.25 } ).reflect().repeat(1); 
+	}
+
+	function death()
+	{
+		stop_actions();
+
+		entity.color.tween(0.2, { g: 0, b: 0 }).reflect().repeat();
+
+		Delta.tween(entity.scale)
+			.propMultiple({x: 3, y: 3}, 2)
+			.ease(Elastic.easeInOut)
+			.wait()
+			.propMultiple({x: 0, y: 0}, 2)
+			.ease(Elastic.easeInOut)
+			.tween(entity.color)
+			.prop('a', 0, 1)
+			.wait()
+			.onComplete(function()
+			{
+				init();
+			});
 	}
 
 	function swipe()
@@ -135,12 +169,12 @@ class Boss
 		weapons.start_bullets(0.5, 300);
 
 		Delta.tween(entity.pos)
-			.propMultiple({x: moveMin, y: 100}, 2)
+			.propMultiple({x: moveMin, y: 100}, 3)
 			.ease(Back.easeInOut)
-			.wait(2.0)
-			.propMultiple({x: moveMax, y: 100}, 2)
+			.wait()
+			.propMultiple({x: moveMax, y: 100}, 3)
 			.ease(Back.easeInOut)
-			.wait(2.0)
+			.wait()
 			.onComplete(complete_action);
 	}
 

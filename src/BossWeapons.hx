@@ -25,8 +25,8 @@ class BossWeapons extends Component
 	var bullet_speed : Float;
 	var bullet_cur_cnt : Float;
 
-	public var bullet_shape : Circle;
-	public var beam_shape : Polygon;
+	public var bullet_shape(default,null) : Circle;
+	public var beam_shape(default,null) : Polygon;
 
 	public function new(?_options:luxe.options.ComponentOptions = null)
 	{
@@ -83,7 +83,7 @@ class BossWeapons extends Component
 		beam.visible = true;
 		entity.events.fire('BossWeapons.beam.fire', beam);
 
-		beam_shape = Polygon.rectangle(0, 0, width * entity.scale.x, height * entity.scale.y);
+		beam_shape = Polygon.rectangle(0, 0, width * (entity.scale.x - 0.5), height * (entity.scale.y));
 	}
 
 	public function stop_beam(?set_invisible:Bool = true)
@@ -96,7 +96,7 @@ class BossWeapons extends Component
 		}
 	}
 
-	public function hide_bullet(b:Sprite)
+	function hide_bullet(b:Sprite)
 	{
 		entity.events.fire('BossWeapons.bullet.disappear', b);
 		b.visible = false;
@@ -161,14 +161,19 @@ class BossWeapons extends Component
 			}
 		}
 
-		if (beam.visible)
+		if (beam.visible && beam.color.a > 0.5)
 		{
-			// world transform doesn't seem to work, trying to figure this out myself
-			var v = entity.pos.clone();
-			v.add(beam.origin);
-			v.subtract(beam.pos);
+			beam.transform.world.decompose();
+			var v = beam.transform.world.pos.clone();
+			v.add(Vector.MultiplyVector(beam.origin, new Vector(entity.scale.x - 0.5, entity.scale.y)));
 
 			beam_shape.position = v;
+
+			if (hull.body.testPolygon(beam_shape) != null)
+			{
+				hull.damage(beam_damage);
+				ret = true;
+			}
 		}
 
 		return ret;

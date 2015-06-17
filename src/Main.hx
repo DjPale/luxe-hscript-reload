@@ -26,11 +26,12 @@ class Main extends luxe.Game
         config.window.title = 'luxe hscript live reload demo!';
         config.window.resizable = false;
 
-        config.preload.texts.push({id: 'assets/Boss.hx'});
-        config.preload.texts.push({id: 'assets/Player.hx'});
+        config.preload.texts.push({id: 'assets/scripts/Boss.hx'});
+        config.preload.texts.push({id: 'assets/scripts/Player.hx'});
         config.preload.textures.push({id: 'assets/sprites/player.png'});
         config.preload.textures.push({id: 'assets/sprites/boss.png'});
         config.preload.textures.push({id: 'assets/sprites/boss-bullet.png'});
+        config.preload.textures.push({id: 'assets/sprites/background.png'});
 
         return config;
     }
