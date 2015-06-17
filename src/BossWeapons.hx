@@ -4,15 +4,29 @@ import luxe.Vector;
 import luxe.Color;
 import luxe.structural.Pool;
 
+import luxe.collision.shapes.Polygon;
+import luxe.collision.shapes.Circle;
+
+
+/*
+	This component takes care of logic related to boss weapons, and also helps with collision checking.
+	In order to ease customization from scripts, it emits events and sends Sprite references that can be used to tweak the weapon look/behavior directly.
+	Another solution would be to attach projectile behavior Component to each bullet and the beam, but the scope of this example is becoming too bloated anyway. :P
+*/
 class BossWeapons extends Component
 {
-	public var bullets : Pool<Sprite>;
+	public var bullet_damage(default,default) : Int = 1;
+	public var beam_damage(default,default) : Int = 2;
 
-	public var beam : Sprite;
+	var bullets : Pool<Sprite>;
+	var beam : Sprite;
 
 	var bullet_rof : Float;
 	var bullet_speed : Float;
 	var bullet_cur_cnt : Float;
+
+	public var bullet_shape : Circle;
+	public var beam_shape : Polygon;
 
 	public function new(?_options:luxe.options.ComponentOptions = null)
 	{
@@ -28,6 +42,9 @@ class BossWeapons extends Component
 			visible: false,
 			parent: entity,
 			});
+
+		bullet_shape = new Circle(0, 0, 8);
+		beam_shape = Polygon.rectangle(0, 0, 0, 0);
 	}
 
 	function create_bullet(i:Int, len:Int) : Sprite
@@ -65,6 +82,8 @@ class BossWeapons extends Component
 
 		beam.visible = true;
 		entity.events.fire('BossWeapons.beam.fire', beam);
+
+		beam_shape = Polygon.rectangle(0, 0, width * entity.scale.x, height * entity.scale.y);
 	}
 
 	public function stop_beam(?set_invisible:Bool = true)
@@ -114,6 +133,45 @@ class BossWeapons extends Component
 				}
 			}
 		}
+	}
+
+	// utility function, not 100% sure where it is right to put this atm
+	public function run_hull_collision(hull:EntityHull, ?_remove_on_hit : Bool = false) : Bool
+	{
+		var ret = false;
+
+		// we don't need any physics, the standard luxe collision routines is sufficent
+		for (bullet in bullets.items)
+		{
+			if (bullet.visible)
+			{
+				bullet_shape.position = bullet.pos.clone();
+
+				if (hull.body.testCircle(bullet_shape) != null)
+				{
+					hull.damage(bullet_damage);
+
+					if (_remove_on_hit)
+					{
+						hide_bullet(bullet);
+					}
+
+					ret = true;
+				}
+			}
+		}
+
+		if (beam.visible)
+		{
+			// world transform doesn't seem to work, trying to figure this out myself
+			var v = entity.pos.clone();
+			v.add(beam.origin);
+			v.subtract(beam.pos);
+
+			beam_shape.position = v;
+		}
+
+		return ret;
 	}
 
 	override function update(dt:Float)

@@ -1,7 +1,10 @@
 import luxe.Component;
 import luxe.collision.shapes.Shape;
 
-
+/*
+	This component keeps track of health and emits various events
+	It also has basic collision information
+*/
 class EntityHull extends Component
 {
 	public var max_health(default,default) : Int;

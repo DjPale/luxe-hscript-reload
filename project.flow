@@ -7,7 +7,7 @@
 
     app : {
       name : 'luxe-hscript-reload',
-      package : 'com.djpale.emptyproject',
+      package : 'com.djpale.luxe.hscriptreload',
       codepaths : ['src', 'lib/hscript', 'assets']
     },
 

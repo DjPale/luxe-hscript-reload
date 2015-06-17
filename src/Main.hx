@@ -8,6 +8,13 @@ typedef GlobalData = {
     views: States,
 }
 
+/*
+    In Main, we try to only do the "low-level" setup-stuff like
+        - Resource loading
+        - Handle low-level events (if any)
+        - Setting up additional batchers (if any)
+        - Setting up states (I call them views for some reason)
+*/
 class Main extends luxe.Game 
 {
     var global : GlobalData = { views: null };

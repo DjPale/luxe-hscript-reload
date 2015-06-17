@@ -83,7 +83,7 @@ class Boss
 		seq.loop = 1;
 		seq.abort_function = stop_actions;
 		seq.add({ name: 'intro', func: intro, num: 1 });
-		seq.add({ name: 'swipe', func: swipe, num: 2 });
+		//seq.add({ name: 'swipe', func: swipe, num: 2 });
 		seq.add({ name: 'prepare_beam', func: prepare_beam, num: 1 });
 		seq.add({ name: 'approach', func: approach, num: 1 });
 

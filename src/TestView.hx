@@ -6,7 +6,6 @@ import luxe.Sprite;
 import luxe.Input;
 
 import luxe.collision.shapes.Polygon;
-import luxe.collision.shapes.Circle;
 
 import tween.Delta;
 
@@ -17,6 +16,15 @@ import scripting.luxe.ScriptComponent;
 
 import Main;
 
+/*
+    In the test view (which is really the main game state) we do the following main tasks
+        - Setup entities and attach components
+        - Initiate checking of collision events between entities
+        - Check and forward input events to entities
+        - Trigger script reloads for entities
+        
+    We assume that all resources are loaded during Main
+*/
 class TestView extends State
 {
 	var batcher : phoenix.Batcher;
@@ -30,6 +38,8 @@ class TestView extends State
     var player_hull : EntityHull;
 
     var reload_id : String;
+
+    var shape_drawer = new luxe.collision.ShapeDrawerLuxe();
 
 	public function new(_global:GlobalData, _batcher:phoenix.Batcher)
 	{
@@ -130,6 +140,7 @@ class TestView extends State
         }
     }
 
+    // I prefer to keep all input checking in states to easier control enabling/disabling
     function check_input()
     {
         if (player_script == null)
@@ -161,33 +172,21 @@ class TestView extends State
         }
     }
 
-    // sorry, a bit cheap
+    // sorry, a bit cheap collision system, It wouldn't work for a full-scale SHMUP since we are selecting specific entities for collisions
     function check_collisions()
     {
         if (boss_weapons == null) return;
 
-        for (b in boss_weapons.bullets.items)
-        {
-            if (b.visible)
-            {
-                if (player_hull.body.testCircle(new Circle(b.pos.x, b.pos.y, 8)) != null)
-                {
-                    boss_weapons.hide_bullet(b);
-                    player_hull.damage(1);
-                }
-            }
-        }
+        boss_weapons.run_hull_collision(player_hull, true);
 
-        var beam = boss_weapons.beam;
+        //player_weapons.run_hull_collision(true, enemy_)
+    }
 
-        // TODO: doesn't work currently
-        if (beam.visible)
-        {
-            if (player_hull.body.testPolygon(Polygon.rectangle(beam.pos.x, beam.pos.y, beam.size.x, beam.size.y)) != null)
-            {
-                player_hull.damage(2);
-            }
-        }
+    function draw_shapes()
+    {
+        if (player_hull.body != null) shape_drawer.drawShape(player_hull.body);
+        if (boss_weapons.bullet_shape != null) shape_drawer.drawShape(boss_weapons.bullet_shape);
+        if (boss_weapons.beam_shape != null) shape_drawer.drawShape(boss_weapons.beam_shape);
     }
 
     override function update(dt:Float)
@@ -195,5 +194,6 @@ class TestView extends State
         Delta.step(dt);
         check_input();
         check_collisions();
+        draw_shapes();
     }
 }
