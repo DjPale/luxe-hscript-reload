@@ -14,15 +14,17 @@ import luxe.tween.Actuate;
 import scripting.ScriptSequencer;
 
 import BossWeapons;
+import EntityHull;
 
 class Boss
 {
 	// help out our completion by self-assignment
 	var entity : Sprite = entity;
-	//var player : Entity = player;
+	var player : Entity = player;
 
 	var seq : ScriptSequencer;
 	var weapons : BossWeapons;
+	var health : EntityHull;
 	var moveMin : Int = 150;
 	var moveMax : Int = Luxe.screen.width - 150;
 	var moveMid : Int = Luxe.screen.mid.x;
@@ -39,7 +41,7 @@ class Boss
 		Delta.removeTweensOf(entity.pos);
 	}
 
-	function destroy()
+	function ondestroy()
 	{
 		stop_actions();
 		weapons.stop_beam();
@@ -52,7 +54,7 @@ class Boss
 		}
 
 		entity = null;
-		//player = null;
+		player = null;
 	}
 
 	function init()
@@ -60,6 +62,7 @@ class Boss
 		event_ids = new Array();
 
 		weapons = entity.get('BossWeapons');
+		health = entity.get('EntityHull');
 
 		// make sure to set properties to an initial stete in case we are reloading
 		entity.scale = new Vector(2, 2);
@@ -71,7 +74,7 @@ class Boss
 		event_ids.push(entity.events.listen('BossWeapons.beam.fire', beam_fire));
 		event_ids.push(entity.events.listen('BossWeapons.beam.disappear', beam_disappear));
 
-		entity.events.listen('EntityHealth.change');
+		event_ids.push(entity.events.listen('EntityHull.damage', damage));
 
 		entity.pos = Luxe.screen.mid;
 		entity.pos.y = -100;
@@ -83,10 +86,7 @@ class Boss
 		seq.add({ name: 'swipe', func: swipe, num: 2 });
 		seq.add({ name: 'prepare_beam', func: prepare_beam, num: 1 });
 		seq.add({ name: 'approach', func: approach, num: 1 });
-	}
 
-	function main()
-	{
 		seq.start();
 	}
 
@@ -122,8 +122,15 @@ class Boss
 		});
 	}
 
+	function damage(amount:Int)
+	{
+		entity.color.tween(0.5, { g: 0.5, b: 0.5 } ).reflect().repeat(1); 
+	}
+
 	function swipe()
 	{
+		health.immune = false;
+
 		weapons.stop_beam(false);
 		weapons.start_bullets(0.5, 300);
 
@@ -139,12 +146,14 @@ class Boss
 
 	function prepare_beam()
 	{
+		health.immune = true;
+
 		weapons.stop_bullets();
 		weapons.stop_beam(false);
 
 	 	entity.color.tween(0.5, { r: 0 }).repeat(5).reflect();
 
-		var rx = Luxe.utils.random.float(moveMin, moveMax);
+		var rx = player.pos.x;
 
 	 	Delta.tween(entity.pos)
 	 	 .prop('x', moveMid, 1)
@@ -156,6 +165,8 @@ class Boss
 
 	function approach()
 	{
+		health.immune = true;
+
 		weapons.stop_bullets();
 		weapons.start_beam(38, 250);
 
@@ -169,6 +180,8 @@ class Boss
 
 	function intro()
 	{
+		health.immune = true;
+
 		Delta.tween(entity.pos)
 			.prop('y', 100, 3)
 			.ease(Quad.easeInOut)

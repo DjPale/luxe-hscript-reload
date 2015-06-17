@@ -20,10 +20,7 @@ class ScriptManager
 		scr_parser.allowTypes = true; 
 
 		scr_interp = new Interp();
-
-		functions = new Map<String,ScriptFunction>();
 	}
-
 
 	function setup_script()
 	{
@@ -41,9 +38,19 @@ class ScriptManager
 	    }
 	    catch(e:Dynamic)
 	    {
-	        trace('Script runtime error: ${e.e}');
+	        trace('Script runtime error: #if hscriptPos ${e.e} #else $e #end');
 	        return;
 	    }
+
+	    if (functions != null)
+	    {
+		   	for (key in functions.keys())
+		   	{
+		   		functions.set(key, null);
+		   	}
+
+	    	functions = null;
+		}
 	}
 
 	public inline function register_variable(name:String, value:Dynamic)
@@ -81,7 +88,7 @@ class ScriptManager
 	    }
 	    catch(e:Dynamic)
 	    {
-	        trace('Script parse error: ${e.e}');
+	        trace('Script parse error: #if hscriptPos ${e.e} #else $e #end');
 	        return;
 	    }
 
@@ -96,22 +103,35 @@ class ScriptManager
 
 	    	var class_type = Type.resolveClass(inc);
 	    	register_variable(cname, class_type);
-		    trace('resolve $inc = $cname = $class_type');
+
+	    	if (class_type == null)
+	    	{
+		    	trace('failed to resolve $inc = $cname = $class_type');
+		    	return;
+		    }
 	    }
 
 	    setup_script();
 	}
 
+	public function has_function(func:String) : Bool
+	{
+		return (scr_interp.variables.get(func) != null);
+	}
 
 	public function run_function(func:String) : Bool
 	{
-	    trace('run_function = $func');
-
+	    //trace('run_function = $func');
   	    if (scr_program == null)
 	    {
 	    	trace('no script loaded, call load_script first!');
 	    	return false;
 	    }  
+
+	    if (functions == null)
+	    {
+	    	functions = new Map<String,ScriptFunction>();
+	    }
 
 	    var fun_ptr : ScriptFunction = functions.get(func);
 
@@ -119,15 +139,17 @@ class ScriptManager
 	    {
 	    	trace('run_function $func not in cache, trying to locate it');
 	    	fun_ptr = cast scr_interp.variables.get(func);
+
+	    	if (fun_ptr == null)
+	    	{
+	    		trace('run_function $func not found!');
+	    		return false;
+	    	}
+
+		    functions.set(func, fun_ptr);
 	    }
 
-	    if (fun_ptr == null)
-	    {
-	    	trace('run_function $func not found!');
-	    	return false;
-	    }
-
-	    trace('run_function $func found, trying to execute!');
+	    //trace('run_function $func found, trying to execute!');
 
         try
         {
@@ -135,7 +157,7 @@ class ScriptManager
         }
         catch(e:Dynamic)
         {
-            trace('Script runtime error for $func: ${e.e}');
+            trace('Script runtime error for $func: #if hscriptPos ${e.e} #else $e #end');
             return false;
         }
 

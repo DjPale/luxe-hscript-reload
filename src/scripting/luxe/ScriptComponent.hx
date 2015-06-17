@@ -10,6 +10,8 @@ class ScriptComponent extends Component
 
 	var _script : String;
 
+	var _has_update : Bool;
+
 	public function new(script:String, ?_options:luxe.options.ComponentOptions)
 	{
 		super(_options);
@@ -36,12 +38,23 @@ class ScriptComponent extends Component
 	{
 		manager.load_script(script);
 		manager.run_function('init');
-		manager.run_function('main');		
+
+		_has_update = manager.has_function('update');
+		trace('has_update = $_has_update');
 	}
 
 	public function reload(script:String)
 	{
-		manager.run_function('destroy');
+		_has_update = false;
+		manager.run_function('ondestroy');
 		load(script);
+	}
+
+	override function update(dt:Float)
+	{
+		if (_has_update)
+		{
+			manager.run_function('update');
+		}
 	}
 }

@@ -20,6 +20,7 @@ class Main extends luxe.Game
         config.window.resizable = false;
 
         config.preload.texts.push({id: 'assets/Boss.hx'});
+        config.preload.texts.push({id: 'assets/Player.hx'});
         config.preload.textures.push({id: 'assets/sprites/player.png'});
         config.preload.textures.push({id: 'assets/sprites/boss.png'});
         config.preload.textures.push({id: 'assets/sprites/boss-bullet.png'});
@@ -30,7 +31,7 @@ class Main extends luxe.Game
     function setup()
     {
         // Set up batchers, states etc.
-        global.views = new States({ name: 'views' });
+        global.views = new States({name: 'views'});
         global.views.add(new TestView(global, Luxe.renderer.batcher));
         global.views.set('TestView');
     }
@@ -46,7 +47,7 @@ class Main extends luxe.Game
 
     function notify_reload(d:luxe.resource.Resource.TextResource)
     {
-        Luxe.events.fire('reload', d);
+        Luxe.events.fire('Luxe.reload', d);
         trace('fire reload with $d');
     }
 
@@ -74,7 +75,7 @@ class Main extends luxe.Game
                 var asset_key = e.file.path.substr(pos);
                 asset_key = asset_key.replace('\\', '/');
 
-                //trace('Trying to find asset with key "$asset_key" from ' + e.file.path);
+                trace('Trying to find asset with key "$asset_key" from ' + e.file.path);
 
                 var resource = Luxe.resources.get(asset_key);
 

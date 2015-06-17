@@ -6,9 +6,9 @@ import luxe.structural.Pool;
 
 class BossWeapons extends Component
 {
-	var bullets : Pool<Sprite>;
+	public var bullets : Pool<Sprite>;
 
-	var beam : Sprite;
+	public var beam : Sprite;
 
 	var bullet_rof : Float;
 	var bullet_speed : Float;
@@ -24,7 +24,7 @@ class BossWeapons extends Component
 		bullets = new Pool<Sprite>(30, create_bullet);
 
 		beam = new Sprite({
-			name: 'boss.beam',
+			name: 'BossWeapons.beam',
 			visible: false,
 			parent: entity,
 			});
@@ -33,7 +33,7 @@ class BossWeapons extends Component
 	function create_bullet(i:Int, len:Int) : Sprite
 	{
 		var ret = new Sprite({
-			name: 'boss.bullet-$i',
+			name: 'BossWeapons.bullet.$i',
 			visible: false,
 			texture: Luxe.resources.texture('assets/sprites/boss-bullet.png')
 			});
@@ -77,6 +77,12 @@ class BossWeapons extends Component
 		}
 	}
 
+	public function hide_bullet(b:Sprite)
+	{
+		entity.events.fire('BossWeapons.bullet.disappear', b);
+		b.visible = false;
+	}
+
 	inline function bullet_tick(dt:Float)
 	{
 		if (bullet_rof > 0)
@@ -104,8 +110,7 @@ class BossWeapons extends Component
 
 				if (b.pos.y > Luxe.screen.height)
 				{
-					entity.events.fire('BossWeapons.bullet.disappear', b);
-					b.visible = false;
+					hide_bullet(b);
 				}
 			}
 		}
