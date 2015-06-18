@@ -2,14 +2,16 @@ package scripting;
 
 import hscript.Parser;
 import hscript.Expr;
-import hscript.Interp;
+import scripting.MyInterp;
+
+using StringTools;
 
 typedef ScriptFunction = Void->Void;
 
 class ScriptManager
 {
 	var scr_parser : Parser;
-	var scr_interp : Interp;
+	var scr_interp : MyInterp;
 	var scr_program : Expr;
 
 	var functions : Map<String,ScriptFunction>;
@@ -19,17 +21,17 @@ class ScriptManager
 		scr_parser = new Parser();
 		scr_parser.allowTypes = true; 
 
-		scr_interp = new Interp();
+		scr_interp = new MyInterp();
 	}
 
-	function setup_script()
+	function setup_script() : Bool
 	{
 	    trace('setup_script');
 
 	    if (scr_program == null)
 	    {
 	    	trace('no script loaded, call load_script first!');
-	    	return;
+	    	return false;
 	    }
    
 	    try
@@ -38,8 +40,8 @@ class ScriptManager
 	    }
 	    catch(e:Dynamic)
 	    {
-	        trace('Script runtime error: #if hscriptPos ${e.e} #else $e #end');
-	        return;
+	        trace('Script runtime error: ' + #if hscriptPos e.e #else e #end);
+	        return false;
 	    }
 
 	    if (functions != null)
@@ -51,6 +53,8 @@ class ScriptManager
 
 	    	functions = null;
 		}
+
+		return true;
 	}
 
 	public inline function register_variable(name:String, value:Dynamic)
@@ -58,12 +62,14 @@ class ScriptManager
 		scr_interp.variables.set(name, value);
 	}
 
-	public function load_script(script:String)
+	public function load_script(script:String) : Bool
 	{
 	    trace('load_script');
 
 	    var import_re = ~/\s*import\s+([^;]+);/;
+	    // TODO: allow extends
 	    var class_re = ~/\s*class\s+([a-zA-Z0-9]+)\s*({?)/;
+	    // TODO: allow package
 
 	    var includes = new Array<String>();
 
@@ -78,18 +84,57 @@ class ScriptManager
 	    		includes.push(import_re.matched(1));
 	    		ofs = idx + 1;
 	    	}
+	    	else if (class_re.match(line))
+	    	{
+	    		// include bracket if it is on the same line to have a valid expression block for the parser
+	    		var bracket = class_re.matched(1);
+	    		if (bracket != null && bracket == '{')
+	    		{
+	    			lines[idx] = '{';
+	    			ofs = idx;
+	    		}
+	    		else
+	    		{
+		    		ofs = idx + 1;
+		    	}
+
+	    		// stop processing if we encounter 'class'
+	    		break;
+	    	}
 
 	    	idx++;
 	    }
 
+	    if (ofs >= lines.length)
+	    {
+	    	trace('Script parse error - premature ending after stripping import/class statements');
+	    	return false;
+	    }
+
+	    var final_script = script;
+
+	    // re-create script without "heading" if needed
+	    if (ofs > 0 || includes.length > 0)
+	    {
+		    var string_buf = new StringBuf();
+		    for (i in ofs...lines.length)
+		    {
+		    	string_buf.add(lines[i]);
+		    }
+
+		    final_script = string_buf.toString();
+		}
+
+		trace(final_script);
+
 	    try
 	    {
-	        scr_program = scr_parser.parseString(script.toString());
+	        scr_program = scr_parser.parseString(final_script.toString());
 	    }
 	    catch(e:Dynamic)
 	    {
-	        trace('Script parse error: #if hscriptPos ${e.e} #else $e #end');
-	        return;
+	        trace('Script parse error: ' + #if hscriptPos e.e #else e #end);
+	        return false;
 	    }
 
 	    for (inc in includes)
@@ -107,11 +152,11 @@ class ScriptManager
 	    	if (class_type == null)
 	    	{
 		    	trace('failed to resolve $inc = $cname = $class_type');
-		    	return;
+		    	return false;
 		    }
 	    }
 
-	    setup_script();
+	    return setup_script();
 	}
 
 	public function has_function(func:String) : Bool
@@ -157,7 +202,7 @@ class ScriptManager
         }
         catch(e:Dynamic)
         {
-            trace('Script runtime error for $func: #if hscriptPos ${e.e} #else $e #end');
+            trace('Script runtime error for $func: ' + #if hscriptPos e.e #else e #end);
             return false;
         }
 

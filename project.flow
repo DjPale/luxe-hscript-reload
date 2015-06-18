@@ -14,7 +14,8 @@
     build : {
       dependencies : {
         luxe : '*',
-        delta : '*'
+        delta : '*',
+        hscript: '*'
       },
       defines : ['hscriptPos'],
       flags: ['-dce no']
