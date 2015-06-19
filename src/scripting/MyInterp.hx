@@ -1,5 +1,6 @@
 package scripting;
 
+// Workaround based on https://github.com/HaxeFoundation/hscript/issues/10 to allow object property access
 class MyInterp extends hscript.Interp
 {
 	override function get( o : Dynamic, f : String ) : Dynamic {
