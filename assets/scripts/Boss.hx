@@ -156,12 +156,12 @@ class Boss
 		Delta.tween(entity.scale)
 			.propMultiple({x: 3, y: 3}, 2)
 			.ease(Elastic.easeInOut)
-			.wait()
+			.wait(0)
 			.propMultiple({x: 0, y: 0}, 2)
 			.ease(Elastic.easeInOut)
 			.tween(entity.color)
 			.prop('a', 0, 1)
-			.wait()
+			.wait(0)
 			.onComplete(function()
 			{
 				reset();
@@ -179,10 +179,10 @@ class Boss
 		Delta.tween(entity.pos)
 			.propMultiple({x: moveMin, y: 100}, 3)
 			.ease(Back.easeInOut)
-			.wait()
+			.wait(0)
 			.propMultiple({x: moveMax, y: 100}, 3)
 			.ease(Back.easeInOut)
-			.wait()
+			.wait(0)
 			.onComplete(complete_action);
 	}
 
