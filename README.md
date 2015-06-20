@@ -1,7 +1,7 @@
 ## Abstract / TLDR;
 _I have made a proof-of-concept which uses **hscript** together with **luxe** and the new **automatic reloading** functionality to provide a very quick way of tweaking entity behavior. With some workarounds which I have provided, I think this is a viable way doing prototyping. A big bonus with my solution is that scripts will behave as a normal Haxe-files. This makes the default **code completion work out-of-the-box** for most IDE's / text editors - which I think is absolutely necessary when scripting._
 
-**Check out the [snõwkit post]() for more details, or a bloated [animated gif](https://dl.dropboxusercontent.com/u/541553/Misc/boss2.gif) or even play a [web version](https://dl.dropboxusercontent.com/u/541553/luxe-hscript-reload/index.html)!**
+**Check out the [snõwkit post](http://snowkit.org/2015/06/20/using-hscript-to-program-entity-behaviors-in-luxe-with-auto-reload/) for more details, or a bloated [animated gif](https://dl.dropboxusercontent.com/u/541553/Misc/boss2.gif) or even play a [web version](https://dl.dropboxusercontent.com/u/541553/luxe-hscript-reload/index.html)!**
 
 ![key-visual](https://dl.dropboxusercontent.com/u/541553/Misc/boss-script.png)
 
@@ -116,8 +116,6 @@ Called from *::_Function_3_1 hscript/Interp.hx line 399
 Called from hscript.Interp::exprReturn hscript/Interp.hx line 211
 ```
 
-The only thing I could figure out the help was the fact that I most likely do a lot of very small changes, so when something stops working, backtrace a few steps and try to locate the culprit. In many cases there are `null` references as a result of missing `import` statements in script. Also, runaway event handlers contributed to some of my bugs.
-
 ### Notes about class availability for scripts
 
 * Haxe can't load classes which aren't declared at compile time. Imports that are not used anywhere are by default ignored by the Haxe Dead Code Elimination (DCE). This must therefore be turned on in the flow file under the `build` section like this: `flags: ['-dce no']`.
@@ -133,7 +131,7 @@ The scripts should primarly control state and values of entities and components 
 
 I created a script handler for ease the dealing with script loading and function calling - including catching potential errors without crashing. I created separate classes / files declaring imports to make classes available to the scripts. For convenience, I also created a luxe Component to handle scripts to be attached to entities. 
 
-I quickly discovered that I needed a simple helper class to help me control main sequences at a more overall level than only using tweening `onComplete` functions - I prefer to limit the use of anonymous functions and an excessive use of extra functions just to sequence things. So I created a `ScriptSequencer` class that specifies functions calls, how many times they will be called and a loop point. It can be used from scripts like this:
+The `ScriptSequencer` class that specifies functions calls, how many times they will be called and a loop point. It can be used from scripts like this:
 ```
 		seq = new ScriptSequencer();
 		seq.loop = 1;
@@ -144,25 +142,19 @@ I quickly discovered that I needed a simple helper class to help me control main
 		seq.add({ name: 'approach', func: approach, num: 1 });
 ```
 
-So here we do one approach from off-screen, two swipes, a beam-prepare action and a approach with the BeamOfDeath.Then we start with the swipes again. Since we hook on to damage and death-events from other components, we handle this when the events actually occur.
-
 ###### Pitfalls
 * Runaway event handlers - always clean up your events. In the script I have an array of references which I add to and always empty and `unlisten` in `ondestroy`.
 * Be careful when calling the `init` function again from the script itself. You might end up with runaway event handlers. Make a separate `reset` function or similar instead.
 * Do small changes in the script before saving and testing. After all - this is what this solution excels at! Also, it is easier to pinpoint errors since debugging is currently very hard.
 
 #### Components
-I utilize the ECS architecture by creating a set of components that can be (re)used, and more importantly - also be fetched and manipulated directly in the script. All "hard-coded" components like weapons and health are (mostly) stand-alone, and do not know much about other components. There are some exceptions, but I try to have other components as explicit dependencies and not implicit ones. 
-
-As an example: in `BossWeapons`, I have a `function run_hull_collision(hull:EntityHull, ?_remove_on_hit : Bool = false) : Bool`. This takes an argument of another component (`EntityHull`). -But they do not do internal calls to fetch components directly from entity via the `get` method.
+All "hard-coded" components like weapons and health are (mostly) stand-alone, and do not know much about other components. There are some exceptions, but I try to have other components as explicit dependencies and not implicit ones. 
 
 Further, the "core" component classes emit events that can be picked up by other components or scripts. The scripts are generally allowed to access components directly if needed. They also subscribe to events from the generic components.Example to access other components from the script:
 ```
 		hull = entity.get('EntityHull');
 		hull.auto_immune_timer = 1;
 ```
-
-At first I didn't add a `update` function since I also wanted to challenge myself by making a pure event-based architecture. So for the Boss I have been relying on creating a sequence helper which is very basic, and handle all other logic using only events and tweening. This works fairly well in my opinion, but depends on how complex your behavior is in the end.
 
 #### Events
 For handling bullet / weapon logic, I soon discovered that I also spent time customizing some aspects (especially aestethics) of the weapon sprites themselves, so I had to provide separate events for this as well. As an example, the following event fires when shooting a new bullet: `entity.events.fire('BossWeapons.bullet.fire', b);`. This can be linked up in the script with a custom functions to do a simple animation, for example:
