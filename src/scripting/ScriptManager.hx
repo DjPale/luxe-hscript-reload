@@ -87,7 +87,7 @@ class ScriptManager
 	    	else if (class_re.match(line))
 	    	{
 	    		// include bracket if it is on the same line to have a valid expression block for the parser
-	    		var bracket = class_re.matched(1);
+	    		var bracket = class_re.matched(2);
 	    		if (bracket != null && bracket == '{')
 	    		{
 	    			lines[idx] = '{';
@@ -124,8 +124,6 @@ class ScriptManager
 
 		    final_script = string_buf.toString();
 		}
-
-		trace(final_script);
 
 	    try
 	    {
@@ -166,10 +164,8 @@ class ScriptManager
 
 	public function run_function(func:String) : Bool
 	{
-	    //trace('run_function = $func');
   	    if (scr_program == null)
 	    {
-	    	trace('no script loaded, call load_script first!');
 	    	return false;
 	    }  
 
@@ -193,8 +189,6 @@ class ScriptManager
 
 		    functions.set(func, fun_ptr);
 	    }
-
-	    //trace('run_function $func found, trying to execute!');
 
         try
         {

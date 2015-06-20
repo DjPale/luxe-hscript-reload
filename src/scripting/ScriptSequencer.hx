@@ -43,7 +43,9 @@ class ScriptSequencer
 		{
 			current_num++;
 
-			trace('idx=$current_idx num=$current_num');
+			#if debug
+			trace('sequence idx=$current_idx num=$current_num');
+			#end
 
 			if (current_num >= actions[current_idx].num)
 			{
@@ -88,6 +90,18 @@ class ScriptSequencer
 		}
 
 		return -1;
+	}
+
+	public function abort()
+	{
+		if (abort_function != null)
+		{
+			abort_function();
+		}
+
+		running = false;
+		current_idx = 0;
+		current_num = -1;
 	}
 
 	public function start(?name:String = null, ?abort_current:Bool = false)

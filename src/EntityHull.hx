@@ -7,7 +7,7 @@ import luxe.collision.shapes.Shape;
 */
 class EntityHull extends Component
 {
-	public var max_health(default,default) : Int;
+	public var max_health(default,null) : Int;
 	public var health(default,null) : Int;
 	public var immune(default,default) : Bool;
 	public var body(default,default) : Shape;
@@ -51,6 +51,12 @@ class EntityHull extends Component
 		{
 			immune_timer(auto_immune_timer);
 		}
+	}
+
+	public function set_max_health(amount:Int)
+	{
+		max_health = amount;
+		health = max_health;
 	}
 
 	public function heal(amount:Int)

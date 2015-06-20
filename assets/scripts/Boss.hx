@@ -39,28 +39,40 @@ class Boss
 
 	function stop_actions()
 	{
+		weapons.stop_beam();
+		weapons.stop_bullets();
+
 		Delta.removeTweensOf(entity.pos);
 		Delta.removeTweensOf(entity.scale);
 		Delta.removeTweensOf(entity.color);
 
 		Actuate.stop(entity.color);
-
-		weapons.stop_beam();
-		weapons.stop_bullets();
 	}
 
 	function ondestroy()
 	{
-		stop_actions();
-
 		// clear and unsubscribe for all events
 		while (event_ids.length > 0)
 		{
 			entity.events.unlisten(event_ids.pop());
 		}
 
+		stop_actions();
+
 		entity = null;
 		player = null;
+	}
+
+	function reset()
+	{
+		// make sure to set properties to an initial stete in case we are reloading
+		entity.scale = new Vector(2, 2);
+		entity.color = new Color();
+
+		health.heal(-1);
+
+		entity.pos = Luxe.screen.mid;
+		entity.pos.y = -100;
 	}
 
 	function init()
@@ -70,11 +82,9 @@ class Boss
 		weapons = entity.get('BossWeapons');
 		health = entity.get('EntityHull');
 
-		health.heal(-1);
+		health.set_max_health(20);
 
-		// make sure to set properties to an initial stete in case we are reloading
-		entity.scale = new Vector(2, 2);
-		entity.color = new Color();
+		reset();
 
 		// save all event handlers - it's important we unsubscibe to avoid dangling events
 		event_ids.push(entity.events.listen('BossWeapons.bullet.fire', bullet_fire));
@@ -84,9 +94,6 @@ class Boss
 
 		event_ids.push(entity.events.listen('EntityHull.damage', damage));
 		event_ids.push(entity.events.listen('EntityHull.death', death));
-
-		entity.pos = Luxe.screen.mid;
-		entity.pos.y = -100;
 
 		seq = new ScriptSequencer();
 		seq.loop = 1;
@@ -142,7 +149,7 @@ class Boss
 
 	function death()
 	{
-		stop_actions();
+		seq.abort();
 
 		entity.color.tween(0.2, { g: 0, b: 0 }).reflect().repeat();
 
@@ -157,7 +164,8 @@ class Boss
 			.wait()
 			.onComplete(function()
 			{
-				init();
+				reset();
+				seq.start();
 			});
 	}
 

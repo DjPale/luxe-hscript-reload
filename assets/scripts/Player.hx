@@ -1,6 +1,7 @@
 import luxe.Sprite;
 import phoenix.Color;
 import tween.Delta;
+import luxe.tween.Actuate;
 
 import EntityHull;
 import PlayerWeapon;
@@ -16,7 +17,8 @@ class Player
 
 	var vert : Float;
 	var horiz : Float;
-	var speed : Float = 200;
+	var speed : Float = 222;
+	var y_approach : Float = 550;
 
 	var event_ids;
 
@@ -35,7 +37,7 @@ class Player
 
 		entity.color.a = 1;
 		entity.pos.x = Luxe.screen.mid.x;
-		entity.pos.y = 400;
+		entity.pos.y = y_approach;
 
 		event_ids.push(entity.events.listen('EntityHull.damage', damage));
 		event_ids.push(entity.events.listen('EntityHull.death', death));
@@ -50,6 +52,12 @@ class Player
 		{
 			entity.events.unlisten(event_ids.pop());
 		}
+
+		Delta.removeTweensOf(entity.pos);
+
+		Actuate.stop(entity.color);
+
+		entity = null;
 	}
 
 	function flicker(time:Float)
@@ -66,17 +74,17 @@ class Player
 
 	function death()
 	{
-		entity.color.a = 0;
 		drive_in = true;
+		entity.pos.x = Luxe.screen.mid.x;
 		entity.pos.y = Luxe.screen.h + 64;
 
-		hull.immune_timer(hull.auto_immune_timer * 3);
+		hull.immune_timer(hull.auto_immune_timer * 4);
 		hull.heal(-1);
 		flicker(hull.auto_immune_timer * 3);
 
 		Delta.tween(entity.pos)
 			.wait(hull.auto_immune_timer)
-			.prop('y', Luxe.screen.h - 128, hull.auto_immune_timer)
+			.prop('y', y_approach, hull.auto_immune_timer)
 			.onComplete(function()
 			{
 				drive_in = false;
